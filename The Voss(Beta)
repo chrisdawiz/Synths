@@ -1,0 +1,61 @@
+<Cabbage>
+form size(500, 500), caption("Synthvoss"), pluginId("Vos1");Overall Synth window details
+keyboard bounds(12, 226, 488, 100) ;Keyboard size 
+;section1
+rslider bounds(4, 10, 82, 68), channel("att"), range(0, 1,  1), text("Att.") value(0.2) ;Rotating Slider inputs
+rslider bounds(96, 10, 82, 68), channel("dec"), range(0, 1, 1), text("Dec.") value(0.5)
+rslider bounds(290, 10, 82, 68), channel("sus"), range(0, 1, 1), text("Sus.") value(0.5)
+rslider bounds(192, 10, 82, 68), channel("rel"), range(0, 1, 1), text("Rel.") value(0.3)
+;section2
+vslider bounds(8, 90, 59, 124), channel("amp1"), range(0, 1, 0, 1), text("Voice1") ;Vertical Sliders
+vslider bounds(76, 90, 59, 124), channel("amp2"), range(0, 1, 0, 1), text("Voice2")
+;section3
+button bounds(230, 174, 80, 40), channel("enableArp"), text("Arp")
+rslider bounds(320, 154, 60, 60), channel("tempo"), range(0, 2), text("Tempo")
+rslider bounds(390, 154, 60, 60), channel("duration"), range(0, 2) text("Duration")
+;section4
+rslider bounds(152, 154, 60, 60)channel("master") range(0, 1, 0, 1, 0.001), text("Master")
+</Cabbage>
+<CsoundSynthesizer>
+<CsOptions>
+-n -d -+rtmidi=NULL -M0 --midi-key-cps=4 --midi-velocity-amp=5 ;Tells csound what to Interface with drivers and also sends midi note & amplitude to P4 & P5
+</CsOptions>
+<CsInstruments>
+sr = 44100 ;Sample Rate
+ksmps = 32 ;Number of Samples in a period
+nchnls = 2 ;Number of Channels of audio output
+0dbfs=1
+
+;Synth
+instr VOSS
+ iAtt chnget "att" ;Controls the Attack
+ iDec chnget "dec" ;Controls the Decay
+ iSus chnget "sus" ;Controls the Sustain
+ iRel chnget "rel" ;Controls the Release
+
+kAmp1 chnget "amp1" ;Conrtols the Amp1
+kAmp2 chnget "amp2" ;Controls the Amp2
+
+kMasterVol chnget "master" ;Maste Volume
+kTempo chnget"tempo"
+kDuration chnget "duration"
+
+kArp chnget "enableArp"
+kArp oscil kTempo, kDuration  ;Basic arpeggiator scehmatic
+
+kEnv madsr iAtt, iDec, iSus, iRel ;Madsr generating an madsr envelope
+
+a1 vco2 (p5*kEnv)*kAmp1, p4*kArp ;Vco voicing with Arpegiator
+a2 oscili (p5*kEnv)*kAmp2, p4*kArp ;OScil voicing with Arpegiator
+
+outs (a1+a2)*kMasterVol, (a2+a1)*kMasterVol
+endin
+
+     
+     
+</CsInstruments> 
+<CsScore>
+f0 z
+
+</CsScore> ;Soundcard
+</CsoundSynthesizer> ;Synth 
